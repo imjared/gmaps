@@ -1,4 +1,6 @@
 var createdMap = {};
+var Directions = new google.maps.DirectionsService();
+var currentRoute      = [];
 
 function initialize() {
   navigator.geolocation.getCurrentPosition(abstractLatLong);
@@ -28,26 +30,37 @@ function newMap(latLngObj) {
 }
 
 function createMapEvents( map ) {
-  google.maps.event.addDomListener( map, 'dblclick', createMarkerOptions );
+  google.maps.event.addDomListener( map, 'dblclick', function(latLngObj) {
+    createMarkerOptions(latLngObj);
+  });
 }
 
 function createMarkerOptions( latLngObj ) {
   var latitude = latLngObj.latLng.kb;
   var longitude = latLngObj.latLng.lb;
+  var gmapsLatLong = new google.maps.LatLng( latitude, longitude );
 
   var markerOptions = {
-    position: new google.maps.LatLng( latitude, longitude ),
+    position: gmapsLatLong,
     map: createdMap
   }
+
   createMarker(markerOptions);
+
+  // only construct route if this isn't the first point
+  if ( currentRoute.length ) {
+    constructRouteRequest(gmapsLatLong);
+  }
+
+  currentRoute.push(gmapsLatLong);
 }
 
-function createMarker(options) {
-  new google.maps.Marker( options )
+function createMarker( options ) {
+  new google.maps.Marker( options );
 }
 
-function clogger(e) {
-  console.log(e.latLng);
+function constructRouteRequest(destination) {
+  
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
