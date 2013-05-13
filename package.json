@@ -1,0 +1,27 @@
+{
+  "name": "gmap",
+  "version": "0.0.1",
+  "description": "gmap",
+  "main": "grunt.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "grunt": ">=0.4.0",
+    "grunt-notify": "0.1.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/imjared/starterKit.git"
+  },
+  "author": "jared",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt-contrib-watch": ">=0.3.1",
+    "grunt-contrib-concat": ">=0.1.3",
+    "grunt-contrib-uglify": ">=0.2.0",
+    "grunt-contrib-jshint": ">=0.3.0",
+    "grunt-contrib-compass": ">=0.1.3",
+    "grunt-contrib-livereload": "~0.1.2"
+  }
+}
