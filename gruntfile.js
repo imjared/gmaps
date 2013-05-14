@@ -3,28 +3,20 @@ module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
-    server: {
-      base: 'http://starterKit'
-    },
+
     pkg: '<json:package.json>',
+
     meta: {
       banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
         '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
         '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;\n' +
         '*/'
     },
+
     lint: {
       files: ['grunt.js']
     },
-    test: {
-      files: ['test/**/*.js']
-    },
-    reload: {
-      proxy: {
-        port: 80,
-        host: 'starterKit'
-      }
-    },
+
     concat: {
       dist: {
         src: [
@@ -68,15 +60,24 @@ module.exports = function(grunt) {
       }
     },
     watch: {
-      reloadBrowser: {
-        files:['index.html', 'stylesheets/*.css'],
-        tasks:'reload'
-      },
-      compass: {
-        files:['sass/*.scss', 'sass/*/*.scss'],
-        tasks: [ 'compass:dev' ]
-      }
+        scripts: {
+            files: ['scripts/source/*.js'],
+            options: {
+                livereload: true
+            }
+        },
+        html: {
+            files:['index.html', 'stylesheets/*.css'],
+            options: {
+                livereload: true
+            }
+        },
+        compass: {
+            files:['sass/*.scss', 'sass/*/*.scss'],
+            tasks: [ 'compass:dev' ]
+        }
     },
+
     jshint: {
       options: {
         curly: true,
@@ -97,14 +98,9 @@ module.exports = function(grunt) {
   });
 
   // Default task.
-  grunt.registerTask('default',
-    [
-      'lint',
-      'compass:prod',
-      'concat',
-      'min'
-    ]
-  );
-  grunt.loadNpmTasks('grunt-reload');
-  grunt.loadNpmTasks( 'grunt-compass' );
+  grunt.registerTask('default', ['watch']);
+
+  // dependencies
+  grunt.loadNpmTasks( 'grunt-contrib-watch' );
+  grunt.loadNpmTasks( 'grunt-contrib-compass' );
 };

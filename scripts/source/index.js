@@ -1,47 +1,66 @@
-(function() {
+var createdMap = {};
+var Directions = new google.maps.DirectionsService();
+var currentRoute      = [];
 
-    var latitude = 0;
-    var longitude = 0;
+function initialize() {
+  navigator.geolocation.getCurrentPosition(abstractLatLong);
+}
 
-    function initialize() {
-        navigator.geolocation.getCurrentPosition(storeVals);
-    }
+function abstractLatLong(data) {
+  var latitude  = data.coords.latitude;
+  var longitude = data.coords.longitude;
+  var latLngObj = new google.maps.LatLng( latitude, longitude );
+  newMap(latLngObj);
+}
 
-    function storeVals(values) {
-        latitude  = values.coords.latitude;
-        longitude = values.coords.longitude;
-        createMapOptions();
-        buildMap();
-    }
+function provideMapOptions( latLngObj ) {
+  var mapOptions = {
+      center: latLngObj,
+      zoom: 13,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      disableDoubleClickZoom: true
+  };
+  return mapOptions;
+}
 
-    function createMapOptions() {
-        var mapOptions = {
-            center: new google.maps.LatLng(latitude, longitude),
-            zoom: 16,
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            keyboardShortcuts: true
-        };
-        return mapOptions;
-    }
+function newMap(latLngObj) {
+  createdMap = new google.maps.Map( document.getElementById( "map-canvas" ), 
+    provideMapOptions(latLngObj) );
+  createMapEvents( createdMap );
+}
 
-    function buildMap() {
-        map = new google.maps.Map(
-            document.getElementById("map-canvas"), createMapOptions()
-        );
-        placeMarker(map);
-    }
+function createMapEvents( map ) {
+  google.maps.event.addDomListener( map, 'dblclick', function(latLngObj) {
+    createMarkerOptions(latLngObj);
+  });
+}
 
-    function placeMarker(mapForUse) {
-        var markerOptions = {
-            animation: 'DROP',
-            position: new google.maps.LatLng(latitude, longitude),
-            map: mapForUse
-        }
+function createMarkerOptions( latLngObj ) {
+  var latitude = latLngObj.latLng.kb;
+  var longitude = latLngObj.latLng.lb;
+  var gmapsLatLong = new google.maps.LatLng( latitude, longitude );
 
-        var marker = new google.maps.Marker(markerOptions);
-    }
+  var markerOptions = {
+    position: gmapsLatLong,
+    map: createdMap
+  }
 
-    google.maps.event.addDomListener(window, 'load', initialize);
+  createMarker(markerOptions);
 
+  // only construct route if this isn't the first point
+  if ( currentRoute.length ) {
+    constructRouteRequest(gmapsLatLong);
+  }
 
- })();
+  currentRoute.push(gmapsLatLong);
+}
+
+function createMarker( options ) {
+  new google.maps.Marker( options );
+}
+
+function constructRouteRequest(destination) {
+  
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
