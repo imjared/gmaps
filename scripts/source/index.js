@@ -1,9 +1,9 @@
-var createdMap = {};
-var Directions = new google.maps.DirectionsService();
-var currentRoute      = [];
+var createdMap   = {};
+var currentRoute = [];
+var Directions   = new google.maps.DirectionsService();
 
 function initialize() {
-  navigator.geolocation.getCurrentPosition(abstractLatLong);
+  navigator.geolocation.getCurrentPosition( abstractLatLong );
 }
 
 function abstractLatLong(data) {
@@ -16,7 +16,7 @@ function abstractLatLong(data) {
 function provideMapOptions( latLngObj ) {
   var mapOptions = {
       center: latLngObj,
-      zoom: 13,
+      zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDoubleClickZoom: true
   };
@@ -24,14 +24,14 @@ function provideMapOptions( latLngObj ) {
 }
 
 function newMap(latLngObj) {
-  createdMap = new google.maps.Map( document.getElementById( "map-canvas" ), 
+  createdMap = new google.maps.Map( document.getElementById( "map-canvas" ),
     provideMapOptions(latLngObj) );
   createMapEvents( createdMap );
 }
 
 function createMapEvents( map ) {
-  google.maps.event.addDomListener( map, 'dblclick', function(latLngObj) {
-    createMarkerOptions(latLngObj);
+  google.maps.event.addDomListener( map, 'click', function( latLngObj ) {
+    createMarkerOptions( latLngObj );
   });
 }
 
@@ -45,22 +45,44 @@ function createMarkerOptions( latLngObj ) {
     map: createdMap
   }
 
-  createMarker(markerOptions);
+  // createMarker( markerOptions );
 
   // only construct route if this isn't the first point
   if ( currentRoute.length ) {
-    constructRouteRequest(gmapsLatLong);
+    constructRouteRequest( gmapsLatLong );
   }
 
-  currentRoute.push(gmapsLatLong);
+  currentRoute.push( gmapsLatLong );
 }
 
 function createMarker( options ) {
   new google.maps.Marker( options );
 }
 
-function constructRouteRequest(destination) {
-  
+function constructRouteRequest( destination ) {
+  var previousPoint = currentRoute[currentRoute.length - 1];
+  var newPoint      = destination;
+  var directionsRequest = {
+    avoidHighways: true,
+    travelMode: google.maps.TravelMode.WALKING,
+    origin: previousPoint,
+    destination: newPoint
+  }
+  Directions.route( directionsRequest, function( result, status ) {
+    drawRoute();
+  });
 }
 
-google.maps.event.addDomListener(window, 'load', initialize);
+function drawRoute() {
+  var lineOptions = {
+      clickable: false,
+      map: createdMap,
+      strokeOpacity: 1,
+      strokeWeight: 3,
+      strokeColor: '00264c',
+      path: currentRoute
+  };
+  new google.maps.Polyline( lineOptions );
+}
+
+google.maps.event.addDomListener( window, 'load', initialize );
