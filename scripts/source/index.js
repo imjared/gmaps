@@ -1,8 +1,9 @@
-var createdMap        = {};
-var currentRoute      = [];
-var Directions        = new google.maps.DirectionsService();
-var distanceIndicator = document.getElementById('calc-distance');
-var totalDistance     = 0;
+var Gmaps = window.Gmaps = {};
+Gmaps.createdMap         = {};
+Gmaps.currentRoute       = [];
+Gmaps.Directions         = new google.maps.DirectionsService();
+Gmaps.distanceIndicator  = document.getElementById('calc-distance');
+Gmaps.totalDistance      = 0;
 
 function initialize() {
   navigator.geolocation.getCurrentPosition( abstractLatLong );
@@ -15,9 +16,9 @@ function abstractLatLong( data ) {
   newMap( latLngObj );
 }
 
-function provideMapOptions( latLngObj ) {
+function provideMapOptions( latLng ) {
   var mapOptions = {
-      center: latLngObj,
+      center: latLng,
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       disableDoubleClickZoom: true,
@@ -26,33 +27,35 @@ function provideMapOptions( latLngObj ) {
   return mapOptions;
 }
 
-function newMap( latLngObj ) {
-  createdMap = new google.maps.Map( document.getElementById( 'map-canvas' ),
-    provideMapOptions(latLngObj) );
-  createMapEvents( createdMap );
+function newMap( latLng ) {
+  Gmaps.createdMap = new google.maps.Map( document.getElementById( 'map-canvas' ),
+    provideMapOptions(latLng) );
+  createMapEvents( Gmaps.createdMap );
 }
 
 function createMapEvents( map ) {
   google.maps.event.addDomListener( map, 'click', function( response ) {
-    createMarkerOptions( response.latLng );
+
+    var latLng = response.latLng;
+    Gmaps.currentRoute.push( latLng );
+
+    // only construct route if this isn't the first point
+    if ( Gmaps.currentRoute.length > 1 ) {
+      constructRouteRequest( latLng );
+    }
+
+    // recenter the map on click
+    map.panTo( latLng );
+
   });
 }
 
 function createMarkerOptions( latLng ) {
-
   var markerOptions = {
     position: latLng,
     map: createdMap
   }
-
-  // createMarker( markerOptions );
-
-  // only construct route if this isn't the first point
-  if ( currentRoute.length ) {
-    constructRouteRequest( latLng );
-  }
-
-  currentRoute.push( latLng );
+  createMarker( markerOptions );
 }
 
 function createMarker( options ) {
@@ -60,7 +63,7 @@ function createMarker( options ) {
 }
 
 function constructRouteRequest( destination ) {
-  var previousPoint = currentRoute[currentRoute.length - 1];
+  var previousPoint = Gmaps.currentRoute[Gmaps.currentRoute.length - 1];
   var newPoint = destination;
   var directionsRequest = {
     avoidHighways: true,
@@ -68,7 +71,7 @@ function constructRouteRequest( destination ) {
     origin: previousPoint,
     destination: newPoint
   }
-  Directions.route( directionsRequest, function( result, status ) {
+  Gmaps.Directions.route( directionsRequest, function( result, status ) {
     var route = result.routes[0];
     drawRoute( route );
   });
@@ -77,24 +80,27 @@ function constructRouteRequest( destination ) {
 function drawRoute( route ) {
   var lineOptions = {
       clickable: false,
-      map: createdMap,
+      map: Gmaps.createdMap,
       strokeOpacity: 1,
       strokeWeight: 4,
       strokeColor: 'cc2644',
       path: route.overview_path
   };
+  console.log( lineOptions );
   new google.maps.Polyline( lineOptions );
-  addDistance( route.legs[0].distance );
+  recordDistance( route.legs[0].distance );
 }
 
-function addDistance( distance ) {
+function recordDistance( distance ) {
+  // distance provides milage for steps or metric value
   var metricValue = distance.value;
-  distanceIndicator.textContent = convertMetersToMiles( metricValue ) + 'mi';
+  Gmaps.totalDistance += metricValue;
+  displayDistance();
 }
 
-function convertMetersToMiles( meters ) {
-  var miles = 0.000621371 * meters;
-  return miles;
+function displayDistance() {
+  var miles = convertMetersToMiles( Gmaps.totalDistance );
+  Gmaps.distanceIndicator.textContent = miles.toFixed(2) + 'mi';
 }
 
 google.maps.event.addDomListener( window, 'load', initialize );

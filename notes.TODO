@@ -1,0 +1,3 @@
+ ✔ refactor growing list of global variables into properties of a GMAPS object literal @done (13-05-17 14:07)
+ ☐ rewrite functions to incorporate these values
+ ☐ instead of keeping latlng objects in the currentRoute, keep the more general response from `Directions.route` wthere so that polyline can be undone
