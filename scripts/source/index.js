@@ -4,10 +4,10 @@ Gmaps.currentRoute       = [];
 Gmaps.Directions         = new google.maps.DirectionsService();
 Gmaps.distanceIndicator  = document.getElementById('calc-distance');
 Gmaps.totalDistance      = 0;
+Gmaps.Polyline;
 
 function initialize() {
   navigator.geolocation.getCurrentPosition( abstractLatLong );
-
 }
 
 function abstractLatLong( data ) {
@@ -32,6 +32,18 @@ function newMap( latLng ) {
   Gmaps.createdMap = new google.maps.Map( document.getElementById( 'map-canvas' ),
     provideMapOptions(latLng) );
   createMapEvents( Gmaps.createdMap );
+  initPolyLine( Gmaps.createdMap );
+}
+
+function initPolyLine( map ) {
+  var lineOptions = {
+    clickable: false,
+    map: map,
+    strokeColor: 'cc2644',
+    strokeOpacity: 1,
+    strokeWeight: 4
+  }
+  Gmaps.Polyline = new google.maps.Polyline( lineOptions );
 }
 
 function createMapEvents( map ) {
@@ -66,8 +78,6 @@ function createMarker( options ) {
 function constructRouteRequest( destination ) {
   var previousPoint = Gmaps.currentRoute[Gmaps.currentRoute.length - 2];
   var newPoint = destination;
-  console.log( 'previous is ' + previousPoint );
-  console.log( 'next is ' + newPoint );
   var directionsRequest = {
     avoidHighways: true,
     travelMode: google.maps.TravelMode.WALKING,
@@ -82,16 +92,7 @@ function constructRouteRequest( destination ) {
 }
 
 function drawRoute( route ) {
-  var lineOptions = {
-      clickable: false,
-      map: Gmaps.createdMap,
-      path: route.overview_path,
-      strokeColor: 'cc2644',
-      strokeOpacity: 1,
-      strokeWeight: 4
-  };
-  opts = lineOptions;
-  new google.maps.Polyline( lineOptions );
+  console.log( Gmaps.Polyline );
   recordDistance( route.legs[0].distance );
 }
 
