@@ -7,6 +7,7 @@ Gmaps.totalDistance      = 0;
 
 function initialize() {
   navigator.geolocation.getCurrentPosition( abstractLatLong );
+
 }
 
 function abstractLatLong( data ) {
@@ -63,14 +64,17 @@ function createMarker( options ) {
 }
 
 function constructRouteRequest( destination ) {
-  var previousPoint = Gmaps.currentRoute[Gmaps.currentRoute.length - 1];
+  var previousPoint = Gmaps.currentRoute[Gmaps.currentRoute.length - 2];
   var newPoint = destination;
+  console.log( 'previous is ' + previousPoint );
+  console.log( 'next is ' + newPoint );
   var directionsRequest = {
     avoidHighways: true,
     travelMode: google.maps.TravelMode.WALKING,
     origin: previousPoint,
     destination: newPoint
   }
+
   Gmaps.Directions.route( directionsRequest, function( result, status ) {
     var route = result.routes[0];
     drawRoute( route );
@@ -81,12 +85,12 @@ function drawRoute( route ) {
   var lineOptions = {
       clickable: false,
       map: Gmaps.createdMap,
-      strokeOpacity: 1,
-      strokeWeight: 4,
+      path: route.overview_path,
       strokeColor: 'cc2644',
-      path: route.overview_path
+      strokeOpacity: 1,
+      strokeWeight: 4
   };
-  console.log( lineOptions );
+  opts = lineOptions;
   new google.maps.Polyline( lineOptions );
   recordDistance( route.legs[0].distance );
 }
